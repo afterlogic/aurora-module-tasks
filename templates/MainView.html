@@ -1,0 +1,80 @@
+<div class="screen TasksLayout" style="display: none;">
+	<div class="panels" data-bind="splitterFlex: {name: 'sales_list', sizes: [20, 20, 60]}">
+		<div class="panel left_panel calendars_panel" data-splitter="sales_list">
+			<div class="panel_content">
+				<div class="buttons big_single_button">
+					<span class="button"  data-bind="click: createTaskInCurrentCalendar"> 
+						<span data-bind="i18n: {'key': '%MODULENAME%/ACTION_CREATE_TASK'}"></span> 
+					</span>
+				</div>
+				<div class="middle_bar">
+					<div class="panel_center">
+						<div class="scroll-inner">				
+							<div class="items_list calendars">
+		<!-- ko foreach: calendars.own() -->
+				<!-- ko template: {name: 'CalendarWebclient_CalendarItemView'} --><!-- /ko -->
+			<!-- /ko -->
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="panel">
+			<div class="panel_content">
+				<div class="toolbar">
+					<span class="content">
+						<span class="item checkstate command" data-bind="click: getCalendars, checkstate: {'activeClass': 'process', 'state': preLoadingList(), 'duration': 800}">
+							<span class="icon"></span>
+						</span>			
+					</span>			
+				</div>
+				<div class="middle_bar">
+					<div class="panel_center unselectable" data-bind="customScrollbar: {x: false}">
+						<div class="sales_list_scroll scroll-inner">
+							<div class="items_list sales_list">
+								<span class="list_notification" data-bind="visible: loadingList()" id="selenium_contacts_loading_info">
+									<span class="description" data-bind="i18n: {'key': '%MODULENAME%/INFO_LOADING_LIST'}"></span>
+								</span>
+								<div class="items_sub_list sales_sub_list" data-bind="foreach: tasksList, visible : !loadingList()">
+									<div class="item" data-bind="css: {'checked': checked, 'selected': selected}, visible: visible">
+										<div class="item_content">
+											<span class="data table fadeout" >
+												<label class="custom_checkbox checked" data-bind="css: {'checked': checked}, style: {'padding': '5px', 'background': color}"> 
+													<span class="icon"></span> 
+													<input type="checkbox" data-bind="checked: checked"> 
+												</label>
+												<span data-bind="text: shortText, style: {'text-decoration': checked() ? 'line-through' : 'none'}"></span>
+											</span>
+											<div class="separator"></div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="panel_bottom unselectable" data-bind="visible: oPageSwitcher.pages().length > 0 && !loadingList(), template: {name: oPageSwitcher.ViewTemplate, data: oPageSwitcher}"></div>
+			</div>
+		</div>
+		<div class="panel sale_viewer" data-splitter="sale_viewer">
+			<div class="panel_content ">
+				<div class="middle_bar" data-bind="with: selectedItem">
+					<div class="fields">
+						<div class="row">
+							<textarea style="width: 100%; height: 150px;" class="input autosize" data-bind="textInput: text"></textarea>
+						</div>
+					</div>
+					<div class="buttons">
+						<span class="button" data-bind="command: $root.saveCommand" id="selenium_contacts_edit_save_button">
+							<span class="text" data-bind="i18n: {'key': 'COREWEBCLIENT/ACTION_SAVE'}"></span>
+						</span>
+						<span class="button secondary_button" data-bind="command: $root.removeCommand">
+							<span class="text" data-bind="i18n: {'key': 'COREWEBCLIENT/ACTION_REMOVE'}"></span>
+						</span>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>

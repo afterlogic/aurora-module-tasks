@@ -1,0 +1,29 @@
+<div class="popup calendar_popup calendar_event" style="display: none;">
+	<div class="popup_panel">
+		<div class="panel_wrap clearfix">
+			<div class="main_panel">
+				<span class="close" data-bind="click: cancelPopup"></span>
+				<div class="fields">
+					<div class="fieldset main">
+						<div class="row name" data-bind="css: {'focused': subjectFocus(), 'filled': subject().length > 0}">
+							<label for="event_subject" class="label placeholder" data-bind="i18n: {'key': '%MODULENAME%/LABEL_SUBJECT'}"></label>
+							<div class="value scrollable_field" data-bind="customScrollbar: {x: false}">
+								<div class="scroll-inner">
+									<textarea id="event_subject" class="input autosize" data-bind="
+										autosize: {minHeight: 26, autosizeTrigger: autosizeTrigger, scrollableHeight: 150}, 
+										value: subject, valueUpdate: 'afterkeydown', hasfocus: subjectFocus"></textarea>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="buttons clearfix">
+						<span class="button" data-bind="i18n: {'key': 'COREWEBCLIENT/ACTION_SAVE'}, click: onSaveClick"></span>
+					</div>
+
+				</div>
+			</div>
+		</div>
+
+	</div>
+	<span class="helper"></span>
+</div>
