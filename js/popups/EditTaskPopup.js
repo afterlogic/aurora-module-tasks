@@ -50,7 +50,7 @@ function CEditTaskPopup()
 			this.selectedCalendarName(oCalendar.name());
 			this.selectedCalendarIsShared(oCalendar.isShared());
 			this.selectedCalendarIsEditable(oCalendar.isEditable());
-//			this.changeCalendarColor(sValue);
+			this.changeCalendarColor(sValue);
 		}
 	}, this);
 	
@@ -69,10 +69,25 @@ CEditTaskPopup.prototype.PopupTemplate = '%ModuleName%_EditTaskPopup';
  */
 CEditTaskPopup.prototype.onOpen = function (oParameters)
 {
+	this.subject('');
 	this.callbackSave = oParameters.CallbackSave;
 	this.callbackDelete = oParameters.CallbackDelete;
 	this.calendars = oParameters.Calendars;
+	
+	if (this.calendars)
+	{
+		this.calendarsList(
+			_.filter(
+				this.calendars.collection(),
+				function(oItem){ 
+					return oItem.isEditable(); 
+				}
+			)
+		);
+	}
 	this.selectedCalendarId(oParameters.SelectedCalendar);
+	this.selectedCalendarId.valueHasMutated();
+	this.changeCalendarColor(this.selectedCalendarId());	
 	
 	this.autosizeTrigger.notifySubscribers(true);
 };
@@ -102,6 +117,23 @@ CEditTaskPopup.prototype.onDeleteClick = function ()
 
 	this.closePopup();
 };
+
+/**
+ * @param {string} sId
+ */
+CEditTaskPopup.prototype.changeCalendarColor = function (sId)
+{
+	if ($.isFunction(this.calendars.getCalendarById))
+	{
+		var oCalendar = this.calendars.getCalendarById(sId);
+		if (oCalendar)
+		{
+			this.calendarColor('');
+			this.calendarColor(oCalendar.color());
+		}
+	}
+};
+
 
 
 module.exports = new CEditTaskPopup();
