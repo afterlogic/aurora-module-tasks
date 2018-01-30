@@ -122,13 +122,15 @@ CMainView.prototype.onGetCalendarsResponse = function (oResponse, oParameters)
 				if (oCalendar)
 				{
 					var calId = oCalendar.id;
+					console.log(oCalendar.control());
+					
 					oCalendar.active.subscribe(function (newValue) {
 						_.each(self.tasksList(), function(oItem){
 							if (oItem.calendarId === calId)
 							{
 								oItem.visible(newValue);
 							}
-						})
+						});
 					}, oCalendar);
 					oCalendar.davUrl(Types.pString(oResponse.Result.ServerUrl));
 					aNewCalendarIds.push(oCalendar.id);

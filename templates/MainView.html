@@ -1,6 +1,6 @@
 <div class="screen TasksLayout" style="display: none;">
-	<div class="panels" data-bind="splitterFlex: {name: 'sales_list', sizes: [20, 20, 60]}">
-		<div class="panel left_panel calendars_panel" data-splitter="sales_list">
+	<div class="panels" data-bind="splitterFlex: {name: 'tasks_list', sizes: [20, 80]}">
+		<div class="panel left_panel calendars_panel" data-splitter="tasks_list">
 			<div class="panel_content">
 				<div class="buttons big_single_button">
 					<span class="button"  data-bind="click: createTaskInCurrentCalendar"> 
@@ -55,25 +55,6 @@
 					</div>
 				</div>
 				<div class="panel_bottom unselectable" data-bind="visible: oPageSwitcher.pages().length > 0 && !loadingList(), template: {name: oPageSwitcher.ViewTemplate, data: oPageSwitcher}"></div>
-			</div>
-		</div>
-		<div class="panel sale_viewer" data-splitter="sale_viewer">
-			<div class="panel_content ">
-				<div class="middle_bar" data-bind="with: selectedItem">
-					<div class="fields">
-						<div class="row">
-							<textarea style="width: 100%; height: 150px;" class="input autosize" data-bind="textInput: text"></textarea>
-						</div>
-					</div>
-					<div class="buttons">
-						<span class="button" data-bind="command: $root.saveCommand" id="selenium_contacts_edit_save_button">
-							<span class="text" data-bind="i18n: {'key': 'COREWEBCLIENT/ACTION_SAVE'}"></span>
-						</span>
-						<span class="button secondary_button" data-bind="command: $root.removeCommand">
-							<span class="text" data-bind="i18n: {'key': 'COREWEBCLIENT/ACTION_REMOVE'}"></span>
-						</span>
-					</div>
-				</div>
 			</div>
 		</div>
 	</div>
