@@ -37,15 +37,14 @@
 									<span class="description" data-bind="i18n: {'key': '%MODULENAME%/INFO_LOADING_LIST'}"></span>
 								</span>
 								<div class="items_sub_list sales_sub_list" data-bind="foreach: tasksList, visible : !loadingList()">
-									<div class="item" data-bind="css: {'checked': checked, 'selected': selected}, visible: visible">
-										<div class="item_content round_checkbox">
+									<div class="item" data-bind="css: {'selected': selected}, visible: visible">
+										<div class="item_content">
 											<span class="data table fadeout" >
-												<input type="checkbox" data-bind="checked: checked, attr: {'id': 'round_checkbox'+id}"/> 
-												<label data-bind="style: {'border-color': color}, attr: {'for': 'round_checkbox'+id}"></label>
-												<span data-bind="
-													text: shortText, 
-													style: {'text-decoration': checked ? 'line-through' : 'none', 'padding': '0px 30px'}">
-												</span>
+												<label class="custom_checkbox round" data-bind="css: {'checked': checked}, style: {'padding': '5px', 'background': color}"> 
+													<span class="icon"></span> 
+													<input type="checkbox" data-bind="checked: checked"> 
+												</label>
+												<span data-bind="text: subject, style: {'text-decoration': checked() ? 'line-through' : 'none'}"></span>
 											</span>
 											<div class="separator"></div>
 										</div>

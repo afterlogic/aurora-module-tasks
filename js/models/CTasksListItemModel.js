@@ -40,10 +40,7 @@ CTasksListItemModel.prototype.parse = function (oData)
 	this.id =  Types.pString(oData.uid);
 	this.calendarId = Types.pString(oData.calendarId);
 	this.text(Types.pString(oData.subject));
-	if (oData.status === 'COMPLETED')
-	{
-		this.checked(true);
-	}
+    this.checked(!!oData.status);
 };
 
 module.exports = CTasksListItemModel;
