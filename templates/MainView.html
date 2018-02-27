@@ -44,7 +44,11 @@
 													<span class="icon"></span> 
 													<input type="checkbox" data-bind="checked: checked"> 
 												</label>
-												<span data-bind="text: subject, style: {'text-decoration': checked() ? 'line-through' : 'none'}"></span>
+												<span>
+													<span data-bind="text: subject, style: {'text-decoration': checked() ? 'line-through' : 'none'}"></span>
+													<br/>
+													<span data-bind="text: start"></span>
+												</span>
 											</span>
 											<div class="separator"></div>
 										</div>
