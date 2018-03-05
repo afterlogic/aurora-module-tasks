@@ -44,10 +44,9 @@
 													<span class="icon"></span> 
 													<input type="checkbox" data-bind="checked: checked"> 
 												</label>
-												<span>
-													<span data-bind="text: subject, style: {'text-decoration': checked() ? 'line-through' : 'none'}"></span>
-													<br/>
-													<span data-bind="text: visibleDate, style: {'font-size': '10pt', 'color': '#4477bb'}"></span>
+												<span data-bind="css: {'withDate': withDate}">
+													<div data-bind="text: subject, style: {'text-decoration': checked() ? 'line-through' : 'none'}"></div>
+													<div data-bind="text: visibleDate, style: {'font-size': '10pt', 'color': '#4477bb'}"></div>
 												</span>
 											</span>
 											<div class="separator"></div>

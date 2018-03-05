@@ -181,20 +181,29 @@ CMainView.prototype.onGetTasksResponse = function (oResponse)
 					var oCalendar = self.calendars.getCalendarById(oItem.calendarId);
 					oItem.visibleDate = ko.observable('');
 
+                    oItem.withDate = ko.observable(false);
                     if (oItem.start && oItem.end)
 					{
-						oItem.start = moment(oItem.start);
-						oItem.end = moment(oItem.end);
+                        oItem.withDate(true);
+                        oItem.start = moment(oItem.start);
+                        oItem.end = moment(oItem.end);
 
-						var isEvOneDay = oItem.end.diff(oItem.start, 'days') === 0;
-						var isEvOneTime = oItem.end.diff(oItem.start, 'minutes') === 0;					
+                        var oMomentStart = oItem.start.clone();
+						var oMomentEnd = oItem.end.clone();
 
-						var sStartDate = self.getDateWithoutYearIfMonthWord(oItem.start.format(self.dateFormatMoment));
-						var sEndDate = !isEvOneDay ? ' - ' + self.getDateWithoutYearIfMonthWord(oItem.end.format(self.dateFormatMoment)) : '';
+                        if (oMomentEnd && oItem.allDay)
+                        {
+                            oMomentEnd.subtract(1, 'days');
+                        }
+						var isEvOneDay = oMomentEnd.diff(oMomentStart, 'days') === 0;
+						var isEvOneTime = oMomentEnd.diff(oMomentStart, 'minutes') === 0;					
 
-						var sStartTime = !oItem.allDay ? ', ' + moment(oItem.start).format(self.timeFormatMoment) : '';
+						var sStartDate = self.getDateWithoutYearIfMonthWord(oMomentStart.format(self.dateFormatMoment));
+						var sEndDate = !isEvOneDay ? ' - ' + self.getDateWithoutYearIfMonthWord(oMomentEnd.format(self.dateFormatMoment)) : '';
+
+						var sStartTime = !oItem.allDay ? ', ' + oMomentStart.format(self.timeFormatMoment) : '';
 						var sEndTime = !oItem.allDay && !isEvOneTime ? 
-							(isEvOneDay ? ' - ' : ', ')  + moment(oItem.end).format(self.timeFormatMoment) : '';
+							(isEvOneDay ? ' - ' : ', ')  + oMomentStart.format(self.timeFormatMoment) : '';
 
 						oItem.visibleDate = ko.observable(
 							sStartDate +
