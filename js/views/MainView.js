@@ -258,21 +258,7 @@ CMainView.prototype.createTaskInCurrentCalendar = function ()
  */
 CMainView.prototype.createTaskToday = function (oCalendar)
 {
-	var oToday = moment();
-
-	if (oToday.minutes() > 30)
-	{
-		oToday.add(60 - oToday.minutes(), 'minutes');
-	}
-	else
-	{
-		oToday.minutes(30);
-	}
-	oToday
-		.seconds(0)
-		.milliseconds(0);
-
-	this.openTaskPopup(oCalendar, oToday, oToday.clone().add(30, 'minutes'), false);
+	this.openTaskPopup(oCalendar, null, null, false);
 };
 
 /**
