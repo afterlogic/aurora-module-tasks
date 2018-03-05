@@ -30,6 +30,13 @@ require('jquery-ui/ui/widgets/datepicker');
  */
 function CMainView()
 {
+	this.sTimeFormat = (UserSettings.timeFormat() === Enums.TimeFormat.F24) ? 'HH:mm' : 'hh:mm A';
+	this.sDateFormat = UserSettings.dateFormat();
+	
+	this.timeFormatMoment = this.sTimeFormat;
+	this.dateFormatMoment = Utils.getDateFormatForMoment(this.sDateFormat);
+	
+	
 	this.saveCommand = Utils.createCommand(this, this.executeSave);	
 	this.removeCommand = Utils.createCommand(this, this.executeRemove);	
 	this.calendars = new CCalendarListModel({
@@ -172,9 +179,30 @@ CMainView.prototype.onGetTasksResponse = function (oResponse)
 		var
 			aNewCollection = Types.isNonEmptyArray(oResult) ? _.compact(_.map(oResult, function (oItem) {
 					var oCalendar = self.calendars.getCalendarById(oItem.calendarId);
+					oItem.visibleDate = ko.observable('');
 
-                    oItem.start = moment(oItem.start);
-                    oItem.end = moment(oItem.end);
+                    if (oItem.start && oItem.end)
+					{
+						oItem.start = moment(oItem.start);
+						oItem.end = moment(oItem.end);
+
+						var isEvOneDay = oItem.end.diff(oItem.start, 'days') === 0;
+						var isEvOneTime = oItem.end.diff(oItem.start, 'minutes') === 0;					
+
+						var sStartDate = self.getDateWithoutYearIfMonthWord(oItem.start.format(self.dateFormatMoment));
+						var sEndDate = !isEvOneDay ? ' - ' + self.getDateWithoutYearIfMonthWord(oItem.end.format(self.dateFormatMoment)) : '';
+
+						var sStartTime = !oItem.allDay ? ', ' + moment(oItem.start).format(self.timeFormatMoment) : '';
+						var sEndTime = !oItem.allDay && !isEvOneTime ? 
+							(isEvOneDay ? ' - ' : ', ')  + moment(oItem.end).format(self.timeFormatMoment) : '';
+
+						oItem.visibleDate = ko.observable(
+							sStartDate +
+							sStartTime +
+							sEndDate +
+							sEndTime
+						);
+					}
 
                     oItem.selected = ko.observable(false);
                     oItem.checked = ko.observable(oItem.status);
@@ -300,7 +328,8 @@ CMainView.prototype.getParamsFromEventData = function (oEventData)
 		endTS: oEventData.end ? oEventData.end.unix() : oEventData.end.unix(),
 		rrule: oEventData.rrule ? JSON.stringify(oEventData.rrule) : null,
 		type: oEventData.type,
-		status: oEventData.status
+		status: oEventData.status,
+		withDate: oEventData.withDate
 	};
 };
 
@@ -370,11 +399,14 @@ CMainView.prototype.taskClickCallback = function (oData)
 			;
 			if (iResult !== Enums.CalendarEditRecurrenceEvent.None)
 			{
-				oParams.Start = oData.start.clone();
-				oParams.Start = oParams.Start.local();
+				if (oData.start && oData.end)
+				{
+					oParams.Start = oData.start.clone();
+					oParams.Start = oParams.Start.local();
 
-				oParams.End = oData.end.clone();
-				oParams.End = oParams.End.local();
+					oParams.End = oData.end.clone();
+					oParams.End = oParams.End.local();
+				}
 				Popups.showPopup(EditTaskPopup, [oParams]);
 			}
 		}, this)
@@ -455,6 +487,24 @@ CMainView.prototype.updateTaskStatus = function (oData)
 		this.onUpdateTaskResponse,
 		this
 	);	
+};
+
+/**
+ * @param {string} sDate
+ */
+CMainView.prototype.getDateWithoutYearIfMonthWord = function (sDate)
+{
+	var
+		aDate = sDate.split(' '),
+		oNowMoment = moment(),
+		oNowYear = oNowMoment.format('YYYY')
+	;
+	
+	if (aDate.length === 3 && oNowYear === aDate[2])
+	{
+		return aDate[0] + ' ' + aDate[1];
+	}
+	return sDate;
 };
 
 module.exports = new CMainView();
