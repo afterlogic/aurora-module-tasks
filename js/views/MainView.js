@@ -480,9 +480,13 @@ CMainView.prototype.updateTaskStatus = function (oData)
 			'Subject': oData.subject,
 			'Status': oData.checked()
 		},
-		this.onUpdateTaskResponse,
+		this.onUpdateTaskStatusResponse,
 		this
 	);	
+};
+
+CMainView.prototype.onUpdateTaskStatusResponse = function (oResponse, oArguments)
+{
 };
 
 /**
