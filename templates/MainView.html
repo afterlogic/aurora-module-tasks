@@ -22,14 +22,22 @@
 		</div>
 		<div class="panel">
 			<div class="panel_content">
-				<div class="toolbar">
-					<span class="content">
-						<span class="item checkstate command" data-bind="click: getCalendars, checkstate: {'activeClass': 'process', 'state': preLoadingList(), 'duration': 800}">
-							<span class="icon"></span>
-						</span>			
-					</span>			
-				</div>
 				<div class="middle_bar">
+					<div class="panel_top">
+						<span class="search_block" style="width: 95%;">
+							<span class="input" data-bind="css: {'focus': isSearchFocused}">
+								<span class="icon search" data-bind="i18n: {'key': 'COREWEBCLIENT/ACTION_SEARCH'}"></span>
+								<input class="field" spellcheck="false" type="text" data-bind="hasfocus: isSearchFocused, value: searchInput, onEnter: searchSubmit, valueUpdate: 'afterkeydown'" />
+							</span>
+						</span>					
+						<span class="toolbar" style="display: inline-block; vertical-align: middle;">
+							<span class="content" style="padding: 0;">
+								<span class="item checkstate command" data-bind="click: getCalendars, checkstate: {'activeClass': 'process', 'state': preLoadingList(), 'duration': 800}">
+									<span class="icon"></span>
+								</span>			
+							</span>			
+						</span>
+					</div>
 					<div class="panel_center unselectable" data-bind="customScrollbar: {x: false}">
 						<div class="sales_list_scroll scroll-inner">
 							<div class="items_list sales_list">

@@ -161,7 +161,9 @@ CMainView.prototype.getTasks = function (aNewCalendarIds)
 		'Calendar',
 		'GetTasks', 
 		{
-			'CalendarIds': aNewCalendarIds
+			'CalendarIds': aNewCalendarIds,
+			'ShowCompleted': true,
+			'Search': this.searchInput()
 		},
 		this.onGetTasksResponse,
 		this
@@ -245,8 +247,8 @@ CMainView.prototype.onBind = function ()
 
 CMainView.prototype.searchSubmit = function ()
 {
-	this.oPageSwitcher.currentPage(1);
-	this.getTasks();
+//	this.oPageSwitcher.currentPage(1);
+	this.getCalendars();
 };
 
 CMainView.prototype.onClearSearchClick = function ()
@@ -463,7 +465,6 @@ CMainView.prototype.onDeleteTaskResponse = function (oResponse)
 		this.getCalendars();
 	}
 };
-
 
 /**
  * @param {Object} oData
