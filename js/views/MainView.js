@@ -57,7 +57,7 @@ function CMainView()
 	this.searchInput = ko.observable('');
 	
 	this.selector = new CSelector(
-		this.tasksLisk,
+		this.tasksList,
 		_.bind(this.viewItem, this),
         this.executeRemove,
 		_.bind(this.taskClickCallback, this)
@@ -179,6 +179,64 @@ CMainView.prototype.getTasks = function (aNewCalendarIds)
 	);
 };
 
+CMainView.prototype.prepareTask = function (oItem)
+{
+	var
+		self = this,
+		oCalendar = self.calendars.getCalendarById(oItem.calendarId)
+	;
+	
+	oItem.visibleDate = ko.observable('');
+
+	oItem.withDate = ko.observable(false);
+	if (oItem.start && oItem.end)
+	{
+		oItem.withDate(true);
+		oItem.start = moment(oItem.start);
+		oItem.end = moment(oItem.end);
+
+		var oMomentStart = oItem.start.clone();
+		var oMomentEnd = oItem.end.clone();
+
+		if (oMomentEnd && oItem.allDay)
+		{
+			oMomentEnd.subtract(1, 'days');
+		}
+		var isEvOneDay = oMomentEnd.diff(oMomentStart, 'days') === 0;
+		var isEvOneTime = oMomentEnd.diff(oMomentStart, 'minutes') === 0;					
+
+		var sStartDate = self.getDateWithoutYearIfMonthWord(oMomentStart.format(self.dateFormatMoment));
+		var sEndDate = !isEvOneDay ? ' - ' + self.getDateWithoutYearIfMonthWord(oMomentEnd.format(self.dateFormatMoment)) : '';
+
+		var sStartTime = !oItem.allDay ? ', ' + oMomentStart.format(self.timeFormatMoment) : '';
+		var sEndTime = !oItem.allDay && !isEvOneTime ? 
+			(isEvOneDay ? ' - ' : ', ')  + oMomentStart.format(self.timeFormatMoment) : '';
+
+		oItem.visibleDate = ko.observable(
+			sStartDate +
+			sStartTime +
+			sEndDate +
+			sEndTime
+		);
+	}
+
+	oItem.selected = ko.observable(false);
+	oItem.checked = ko.observable(oItem.status);
+	oItem.visible = ko.observable(oCalendar.active());
+	oItem.color = oCalendar.color;
+	oItem.checked.subscribe(function(newValue){
+		self.updateTaskStatus(oItem);
+	});
+	return oItem;	
+};
+
+CMainView.prototype.getTaskFromList = function (uid)
+{
+	return _.find(this.tasksList(), function (oItem){
+		return oItem.uid === uid;
+	});
+};
+
 CMainView.prototype.onGetTasksResponse = function (oResponse)
 {
 	var 
@@ -189,50 +247,8 @@ CMainView.prototype.onGetTasksResponse = function (oResponse)
 	{
 		var
 			aNewCollection = Types.isNonEmptyArray(oResult) ? _.compact(_.map(oResult, function (oItem) {
-					var oCalendar = self.calendars.getCalendarById(oItem.calendarId);
-					oItem.visibleDate = ko.observable('');
-
-                    oItem.withDate = ko.observable(false);
-                    if (oItem.start && oItem.end)
-					{
-                        oItem.withDate(true);
-                        oItem.start = moment(oItem.start);
-                        oItem.end = moment(oItem.end);
-
-                        var oMomentStart = oItem.start.clone();
-						var oMomentEnd = oItem.end.clone();
-
-                        if (oMomentEnd && oItem.allDay)
-                        {
-                            oMomentEnd.subtract(1, 'days');
-                        }
-						var isEvOneDay = oMomentEnd.diff(oMomentStart, 'days') === 0;
-						var isEvOneTime = oMomentEnd.diff(oMomentStart, 'minutes') === 0;					
-
-						var sStartDate = self.getDateWithoutYearIfMonthWord(oMomentStart.format(self.dateFormatMoment));
-						var sEndDate = !isEvOneDay ? ' - ' + self.getDateWithoutYearIfMonthWord(oMomentEnd.format(self.dateFormatMoment)) : '';
-
-						var sStartTime = !oItem.allDay ? ', ' + oMomentStart.format(self.timeFormatMoment) : '';
-						var sEndTime = !oItem.allDay && !isEvOneTime ? 
-							(isEvOneDay ? ' - ' : ', ')  + oMomentStart.format(self.timeFormatMoment) : '';
-
-						oItem.visibleDate = ko.observable(
-							sStartDate +
-							sStartTime +
-							sEndDate +
-							sEndTime
-						);
-					}
-
-                    oItem.selected = ko.observable(false);
-                    oItem.checked = ko.observable(oItem.status);
-                    oItem.visible = ko.observable(oCalendar.active());
-                    oItem.color = oCalendar.color;
-					oItem.checked.subscribe(function(newValue){
-						self.updateTaskStatus(oItem);
-					});
-					return oItem;
-				})) : [];
+				return self.prepareTask(oItem);
+			})) : [];
 		this.tasksList(aNewCollection);
 		this.loadingList(false);
 	}
@@ -364,7 +380,8 @@ CMainView.prototype.onCreateTaskResponse = function (oResponse)
 
 	if (oResult)
 	{
-		this.getCalendars();
+		var oTask = this.prepareTask(oResult.Events[0]);
+		this.tasksList.push(oTask);
 	}
 };
 
@@ -445,7 +462,21 @@ CMainView.prototype.onUpdateTaskResponse = function (oResponse, oArguments)
 
 	if (oResult)
 	{
-		this.getCalendars();
+		var 
+			uid = oResult.Events[0].uid,
+			oTask = this.getTaskFromList(uid)
+		;
+		if(oTask)
+		{
+			oTask = this.prepareTask(oResult.Events[0]);
+			var index = _.findIndex(this.tasksList(), function(oItem){
+				return oItem.uid === uid;
+			});
+			if (index >= 0)
+			{
+				this.tasksList.splice(index, 1, oTask);
+			}
+		}
 	}
 };
 
