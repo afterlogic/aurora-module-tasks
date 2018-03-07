@@ -63,8 +63,9 @@ function CMainView()
 		_.bind(this.taskClickCallback, this)
 	);
 	
+	this.searchClick = ko.observable(false);
 	this.isSearch = ko.computed(function () {
-		return this.searchInput() !== '';
+		return this.searchInput() !== '' && this.searchClick();
 	}, this);
 	
 	this.pageSwitcherLocked = ko.observable(false);
@@ -80,6 +81,14 @@ function CMainView()
 		this.preLoadingList(bLoading);
 	}, this);
 	this.sTimeFormat = (UserSettings.timeFormat() === Enums.TimeFormat.F24) ? 'HH:mm' : 'hh:mm A';
+	this.isEmptyList = ko.computed(function () {
+		return 0 === this.tasksList().length;
+	}, this);
+	this.searchText = ko.computed(function () {
+		return TextUtils.i18n('%MODULENAME%/INFO_SEARCH_RESULT', {
+			'SEARCH': this.searchInput()
+		});
+	}, this);	
 }
 
 _.extendOwn(CMainView.prototype, CAbstractScreenView.prototype);
@@ -247,7 +256,8 @@ CMainView.prototype.onBind = function ()
 
 CMainView.prototype.searchSubmit = function ()
 {
-//	this.oPageSwitcher.currentPage(1);
+	this.searchClick(true);
+	this.tasksList([]);
 	this.getCalendars();
 };
 
@@ -255,6 +265,7 @@ CMainView.prototype.onClearSearchClick = function ()
 {
 	// initiation empty search
 	this.searchInput('');
+	this.searchClick(false);
 	this.searchSubmit();
 };
 
