@@ -45,11 +45,11 @@
 									<span class="link" data-bind="text: actionCompletedText(), click: onShowCompletedClick"></span>
 								</span>
 								<div data-bind="visible: isEmptyList() && !loadingList()">
-									<span class="list_notification" data-bind="visible: !isSearch()">
+									<span class="list_notification" data-bind="visible: searchText() === ''">
 										<span class="description" data-bind="i18n: {'key': '%MODULENAME%/INFO_NO_TASKS'}"></span>
 										<span class="description" data-bind="i18n: {'key': '%MODULENAME%/INFO_CREATE'}"></span>
 									</span>
-									<span class="list_notification" data-bind="visible: isSearch()">
+									<span class="list_notification" data-bind="visible: searchText() !== ''">
 										<span class="link" data-bind="i18n: {'key': 'COREWEBCLIENT/ACTION_CLEAR_SEARCH'}, click: onClearSearchClick"></span>
 										<span class="description" data-bind="i18n: {'key': '%MODULENAME%/INFO_NO_TASKS_FOUND'}"></span>
 									</span>
@@ -57,7 +57,7 @@
 								<span class="list_notification" data-bind="visible: loadingList()" id="selenium_contacts_loading_info">
 									<span class="description" data-bind="i18n: {'key': '%MODULENAME%/INFO_LOADING_LIST'}"></span>
 								</span>
-								<span class="list_notification" data-bind="visible: isSearch() && !isEmptyList()">
+								<span class="list_notification" data-bind="visible: searchText() !== '' && !isEmptyList()">
 									<span class="link" data-bind="i18n: {'key': 'COREWEBCLIENT/ACTION_CLEAR_SEARCH'}, click: onClearSearchClick"></span>
 									<span class="description" data-bind="text: searchText"></span>
 								</span>

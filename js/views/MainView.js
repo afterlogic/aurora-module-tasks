@@ -273,11 +273,18 @@ CMainView.prototype.onBind = function ()
 
 CMainView.prototype.searchSubmit = function ()
 {
-	this.searchText(
-		TextUtils.i18n('%MODULENAME%/INFO_SEARCH_RESULT', {
-			'SEARCH': this.searchInput()
-		})
-	);
+	if (this.searchInput() !== '')
+	{
+		this.searchText(
+			TextUtils.i18n('%MODULENAME%/INFO_SEARCH_RESULT', {
+				'SEARCH': this.searchInput()
+			})
+		);
+	}
+	else
+	{
+		this.searchText('');
+	}
 	
 	this.searchClick(true);
 	this.tasksList([]);
