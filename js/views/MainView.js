@@ -84,11 +84,12 @@ function CMainView()
 	this.isEmptyList = ko.computed(function () {
 		return 0 === this.tasksList().length;
 	}, this);
-	this.searchText = ko.computed(function () {
-		return TextUtils.i18n('%MODULENAME%/INFO_SEARCH_RESULT', {
-			'SEARCH': this.searchInput()
-		});
+	this.searchText = ko.observable('');
+	this.showCompleted = ko.observable(false);
+	this.actionCompletedText = ko.computed(function () {
+		return this.showCompleted() ?  TextUtils.i18n('%MODULENAME%/ACTION_HIDE_COMPLETED') : TextUtils.i18n('%MODULENAME%/ACTION_SHOW_COMPLETED');
 	}, this);	
+
 }
 
 _.extendOwn(CMainView.prototype, CAbstractScreenView.prototype);
@@ -171,7 +172,7 @@ CMainView.prototype.getTasks = function (aNewCalendarIds)
 		'GetTasks', 
 		{
 			'CalendarIds': aNewCalendarIds,
-			'ShowCompleted': true,
+			'Completed': this.showCompleted(),
 			'Search': this.searchInput()
 		},
 		this.onGetTasksResponse,
@@ -272,6 +273,12 @@ CMainView.prototype.onBind = function ()
 
 CMainView.prototype.searchSubmit = function ()
 {
+	this.searchText(
+		TextUtils.i18n('%MODULENAME%/INFO_SEARCH_RESULT', {
+			'SEARCH': this.searchInput()
+		})
+	);
+	
 	this.searchClick(true);
 	this.tasksList([]);
 	this.getCalendars();
@@ -281,6 +288,7 @@ CMainView.prototype.onClearSearchClick = function ()
 {
 	// initiation empty search
 	this.searchInput('');
+	this.searchText('');
 	this.searchClick(false);
 	this.searchSubmit();
 };
@@ -498,13 +506,20 @@ CMainView.prototype.executeRemove = function (oData)
 	
 };
 
-CMainView.prototype.onDeleteTaskResponse = function (oResponse)
+CMainView.prototype.onDeleteTaskResponse = function (oResponse, oArguments)
 {
-	var oResult = oResponse.Result;
-
-	if (oResult)
+	if (oResponse.Result)
 	{
-		this.getCalendars();
+		var 
+			uid = oArguments.Parameters.uid,
+			oTask = this.getTaskFromList(uid)
+		;
+		if(oTask)
+		{
+			this.tasksList(_.without(this.tasksList(), _.findWhere(this.tasksList(), {
+				uid: uid
+			})));			
+		}
 	}
 };
 
@@ -547,6 +562,12 @@ CMainView.prototype.getDateWithoutYearIfMonthWord = function (sDate)
 		return aDate[0] + ' ' + aDate[1];
 	}
 	return sDate;
+};
+
+CMainView.prototype.onShowCompletedClick = function ()
+{
+	this.showCompleted(!this.showCompleted());
+	this.searchSubmit();
 };
 
 module.exports = new CMainView();
