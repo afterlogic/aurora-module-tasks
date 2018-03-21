@@ -542,7 +542,8 @@ CMainView.prototype.updateTaskStatus = function (oData)
 			'CalendarId': oData.calendarId,
 			'TaskId': oData.uid,
 			'Subject': oData.subject,
-			'Status': oData.checked()
+			'Status': oData.checked(),
+			'WithDate': oData.withDate()
 		},
 		this.onUpdateTaskStatusResponse,
 		this
