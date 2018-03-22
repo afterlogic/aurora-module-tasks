@@ -30,10 +30,8 @@ require('jquery-ui/ui/widgets/datepicker');
  */
 function CMainView()
 {
-	this.sTimeFormat = (UserSettings.timeFormat() === Enums.TimeFormat.F24) ? 'HH:mm' : 'hh:mm A';
 	this.sDateFormat = UserSettings.dateFormat();
 	
-	this.timeFormatMoment = this.sTimeFormat;
 	this.dateFormatMoment = Utils.getDateFormatForMoment(this.sDateFormat);
 	
 	
@@ -80,7 +78,9 @@ function CMainView()
 	this.loadingList.subscribe(function (bLoading) {
 		this.preLoadingList(bLoading);
 	}, this);
-	this.sTimeFormat = (UserSettings.timeFormat() === Enums.TimeFormat.F24) ? 'HH:mm' : 'hh:mm A';
+	this.sTimeFormat = ko.computed(function () {
+		return (UserSettings.timeFormat() === Enums.TimeFormat.F24) ? 'HH:mm' : 'hh:mm A';
+	}, this);
 	this.isEmptyList = ko.computed(function () {
 		return 0 === this.tasksList().length;
 	}, this);
@@ -209,9 +209,9 @@ CMainView.prototype.prepareTask = function (oItem)
 		var sStartDate = self.getDateWithoutYearIfMonthWord(oMomentStart.format(self.dateFormatMoment));
 		var sEndDate = !isEvOneDay ? ' - ' + self.getDateWithoutYearIfMonthWord(oMomentEnd.format(self.dateFormatMoment)) : '';
 
-		var sStartTime = !oItem.allDay ? ', ' + oMomentStart.format(self.timeFormatMoment) : '';
+		var sStartTime = !oItem.allDay ? ', ' + oMomentStart.format(this.sTimeFormat()) : '';
 		var sEndTime = !oItem.allDay && !isEvOneTime ? 
-			(isEvOneDay ? ' - ' : ', ')  + oMomentStart.format(self.timeFormatMoment) : '';
+			(isEvOneDay ? ' - ' : ', ')  + oMomentStart.format(this.sTimeFormat()) : '';
 
 		oItem.visibleDate = ko.observable(
 			sStartDate +
@@ -250,6 +250,7 @@ CMainView.prototype.onGetTasksResponse = function (oResponse)
 			aNewCollection = Types.isNonEmptyArray(oResult) ? _.compact(_.map(oResult, function (oItem) {
 				return self.prepareTask(oItem);
 			})) : [];
+			
 		this.tasksList(aNewCollection);
 		this.loadingList(false);
 	}
@@ -332,7 +333,7 @@ CMainView.prototype.openTaskPopup = function (oCalendar, oStart, oEnd, bAllDay)
 			Start: oStart,
 			End: oEnd,
 			AllDay: bAllDay,            
-			TimeFormat: this.sTimeFormat,
+			TimeFormat: this.sTimeFormat(),
 			DateFormat: UserSettings.dateFormat(),
             Type: 'todo',
 			IsTaskApp: true
@@ -427,7 +428,7 @@ CMainView.prototype.taskClickCallback = function (oData)
 					Owner: oData.owner,
 					Appointment: false,
 					OwnerName: oData.ownerName,
-					TimeFormat: this.sTimeFormat,
+					TimeFormat: this.sTimeFormat(),
 					DateFormat: UserSettings.dateFormat(),
 					AllEvents: iResult,
 					CallbackSave: _.bind(this.updateTask, this),
