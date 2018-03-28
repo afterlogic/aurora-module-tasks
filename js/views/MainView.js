@@ -423,7 +423,7 @@ CMainView.prototype.taskClickCallback = function (oData)
 					Subject: oData.subject,
 					Alarms: oData.alarms,
 					Attendees: oData.attendees,
-					RRule: null,
+					RRule: oData.rrule,
 					Excluded: false,
 					Owner: oData.owner,
 					Appointment: false,
