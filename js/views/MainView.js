@@ -335,7 +335,7 @@ CMainView.prototype.openTaskPopup = function (oCalendar, oStart, oEnd, bAllDay)
 			AllDay: bAllDay,            
 			TimeFormat: this.sTimeFormat(),
 			DateFormat: UserSettings.dateFormat(),
-            Type: 'todo',
+            Type: 'VTODO',
 			IsTaskApp: true
 		}]);
 	}
