@@ -211,7 +211,7 @@ CMainView.prototype.prepareTask = function (oItem)
 
 		var sStartTime = !oItem.allDay ? ', ' + oMomentStart.format(this.sTimeFormat()) : '';
 		var sEndTime = !oItem.allDay && !isEvOneTime ? 
-			(isEvOneDay ? ' - ' : ', ')  + oMomentStart.format(this.sTimeFormat()) : '';
+			(isEvOneDay ? ' - ' : ', ')  + oMomentEnd.format(this.sTimeFormat()) : '';
 
 		oItem.visibleDate = ko.observable(
 			sStartDate +
