@@ -3,10 +3,11 @@
 module.exports = function (oAppData) {
 	var
 		App = require('%PathToCoreWebclientModule%/js/App.js'),
+		ModulesManager = require('%PathToCoreWebclientModule%/js/ModulesManager.js'),
 		sModuleName = 'tasks'
 	;
 	
-	if (App.getUserRole() === Enums.UserRole.NormalUser)
+	if (App.getUserRole() === Enums.UserRole.NormalUser && ModulesManager.isModuleEnabled('CalendarWebclient'))
 	{
 		var
 			_ = require('underscore'),
