@@ -137,25 +137,29 @@ CMainView.prototype.onGetCalendarsResponse = function (oResponse, oParameters)
 	{
 		_.each(oResponse.Result.Calendars, function (oCalendarData) {
 			oCalendar = this.calendars.parseCalendar(oCalendarData);
-			aCalendarIds.push(oCalendar.id);
-			oClientCalendar = this.calendars.getCalendarById(oCalendar.id);
-			if (this.needsToReload || (oClientCalendar && oClientCalendar.sSyncToken) !== (oCalendar && oCalendar.sSyncToken))
+			
+			if (!oCalendar.isShared()) // TODO
 			{
-				oCalendar = this.calendars.parseAndAddCalendar(oCalendarData);
-				if (oCalendar)
+				aCalendarIds.push(oCalendar.id);
+				oClientCalendar = this.calendars.getCalendarById(oCalendar.id);
+				if (this.needsToReload || (oClientCalendar && oClientCalendar.sSyncToken) !== (oCalendar && oCalendar.sSyncToken))
 				{
-					var calId = oCalendar.id;
-					
-					oCalendar.active.subscribe(function (newValue) {
-						_.each(self.tasksList(), function(oItem){
-							if (oItem.calendarId === calId)
-							{
-								oItem.visible(newValue);
-							}
-						});
-					}, oCalendar);
-					oCalendar.davUrl(Types.pString(oResponse.Result.ServerUrl));
-					aNewCalendarIds.push(oCalendar.id);
+					oCalendar = this.calendars.parseAndAddCalendar(oCalendarData);
+					if (oCalendar)
+					{
+						var calId = oCalendar.id;
+
+						oCalendar.active.subscribe(function (newValue) {
+							_.each(self.tasksList(), function(oItem){
+								if (oItem.calendarId === calId)
+								{
+									oItem.visible(newValue);
+								}
+							});
+						}, oCalendar);
+						oCalendar.davUrl(Types.pString(oResponse.Result.ServerUrl));
+						aNewCalendarIds.push(oCalendar.id);
+					}
 				}
 			}
 		}, this);
