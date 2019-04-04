@@ -256,6 +256,7 @@ CMainView.prototype.onGetTasksResponse = function (oResponse)
 			})) : [];
 			
 		this.tasksList(aNewCollection);
+		this.sortTasksList();
 		this.loadingList(false);
 	}
 };
@@ -394,6 +395,42 @@ CMainView.prototype.createTask = function (oData)
 	);	
 };
 
+CMainView.prototype.sortTasksList = function ()
+{
+	this.tasksList.sort(function (left, right) {
+		if (left.startTS !== null && right.startTS !== null) 
+		{
+			if (left.startTS === right.startTS) 
+			{
+				return 0;
+			}
+			return (left.startTS > right.startTS) ? 1 : -1;
+		}
+		else
+		{
+			if (left.startTS === null && right.startTS === null)
+			{
+				if (left.lastModified === right.lastModified) 
+				{
+					return 0;
+				}
+				return (left.lastModified > right.lastModified) ? 1 : -1;
+			}
+			else
+			{
+				if (left.startTS === null)
+				{
+					return 1;
+				}
+				if (right.startTS === null)
+				{
+					return -1;
+				}
+			}
+		}
+	});
+}
+
 CMainView.prototype.onCreateTaskResponse = function (oResponse)
 {
 	var oResult = oResponse.Result;
@@ -402,6 +439,7 @@ CMainView.prototype.onCreateTaskResponse = function (oResponse)
 	{
 		var oTask = this.prepareTask(oResult.Events[0]);
 		this.tasksList.push(oTask);
+		this.sortTasksList();
 	}
 };
 
@@ -496,6 +534,7 @@ CMainView.prototype.onUpdateTaskResponse = function (oResponse, oArguments)
 			{
 				this.tasksList.splice(index, 1, oTask);
 			}
+			this.sortTasksList();
 		}
 	}
 };
