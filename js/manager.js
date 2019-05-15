@@ -4,14 +4,13 @@ module.exports = function (oAppData) {
 	var
 		App = require('%PathToCoreWebclientModule%/js/App.js'),
 		ModulesManager = require('%PathToCoreWebclientModule%/js/ModulesManager.js'),
+		
 		sModuleName = 'tasks'
 	;
 	
-	if (App.getUserRole() === Enums.UserRole.NormalUser && ModulesManager.isModuleEnabled('CalendarWebclient'))
+	if (App.isUserNormalOrTenant() && ModulesManager.isModuleEnabled('CalendarWebclient'))
 	{
 		var
-			_ = require('underscore'),
-
 			TextUtils = require('%PathToCoreWebclientModule%/js/utils/Text.js'),
 			HeaderItemView = null
 		;
@@ -32,6 +31,7 @@ module.exports = function (oAppData) {
 				
 				return oScreens;
 			},
+			
 			/**
 			 * Returns object of header item view of sales module.
 			 * 
