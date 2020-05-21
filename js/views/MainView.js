@@ -6,15 +6,17 @@ var
 	ko = require('knockout'),
 	moment = require('moment'),
     
-	UserSettings = require('%PathToCoreWebclientModule%/js/Settings.js'),
 	TextUtils = require('%PathToCoreWebclientModule%/js/utils/Text.js'),
-	Utils = require('%PathToCoreWebclientModule%/js/utils/Common.js'),
-	Ajax = require('%PathToCoreWebclientModule%/js/Ajax.js'),
-	CSelector = require('%PathToCoreWebclientModule%/js/CSelector.js'),
-	CAbstractScreenView = require('%PathToCoreWebclientModule%/js/views/CAbstractScreenView.js'),
-	CPageSwitcherView = require('%PathToCoreWebclientModule%/js/views/CPageSwitcherView.js'),
 	Types = require('%PathToCoreWebclientModule%/js/utils/Types.js'),
+	Utils = require('%PathToCoreWebclientModule%/js/utils/Common.js'),
+	
+	Ajax = require('%PathToCoreWebclientModule%/js/Ajax.js'),
+	Api = require('%PathToCoreWebclientModule%/js/Api.js'),
+	CAbstractScreenView = require('%PathToCoreWebclientModule%/js/views/CAbstractScreenView.js'),
+	CSelector = require('%PathToCoreWebclientModule%/js/CSelector.js'),
+	CPageSwitcherView = require('%PathToCoreWebclientModule%/js/views/CPageSwitcherView.js'),
 	Popups = require('%PathToCoreWebclientModule%/js/Popups.js'),
+	UserSettings = require('%PathToCoreWebclientModule%/js/Settings.js'),
 	
 	CCalendarListModel = require('modules/CalendarWebclient/js/models/CCalendarListModel.js'),
 	CCalendarModel = require('modules/CalendarWebclient/js/models/CCalendarModel.js'),
@@ -443,6 +445,10 @@ CMainView.prototype.onCreateTaskResponse = function (oResponse)
 		this.tasksList.push(oTask);
 		this.sortTasksList();
 	}
+	else
+	{
+		Api.showErrorByCode(oResponse);
+	}
 };
 
 /**
@@ -539,6 +545,10 @@ CMainView.prototype.onUpdateTaskResponse = function (oResponse, oArguments)
 			this.sortTasksList();
 		}
 	}
+	else
+	{
+		Api.showErrorByCode(oResponse);
+	}
 };
 
 /**
@@ -574,6 +584,10 @@ CMainView.prototype.onDeleteTaskResponse = function (oResponse, oArguments)
 			})));			
 		}
 	}
+	else
+	{
+		Api.showErrorByCode(oResponse);
+	}
 };
 
 /**
@@ -598,6 +612,10 @@ CMainView.prototype.updateTaskStatus = function (oData)
 
 CMainView.prototype.onUpdateTaskStatusResponse = function (oResponse, oArguments)
 {
+	if (!oResponse.Result)
+	{
+		Api.showErrorByCode(oResponse);
+	}
 };
 
 /**
