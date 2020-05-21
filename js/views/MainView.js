@@ -163,6 +163,8 @@ CMainView.prototype.onGetCalendarsResponse = function (oResponse, oParameters)
 				}
 			}
 		}, this);
+		
+		this.calendars.expunge(aCalendarIds);
 
 		this.getTasks(aCalendarIds);
 	}
