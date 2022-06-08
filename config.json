@@ -1,10 +1,18 @@
 {
-	"Disabled": [
-		false,
-		"bool"
-	],
-    "ItemsPerPage": [
-		20,
-		"int"
-	]
+  "Disabled": [
+    false,
+    "bool"
+  ],
+  "Disabled_Description": [
+    "",
+    "string"
+  ],
+  "ItemsPerPage": [
+    20,
+    "int"
+  ],
+  "ItemsPerPage_Description": [
+    "",
+    "string"
+  ]
 }
