@@ -4,7 +4,7 @@
 		"bool"
 	],
 	"Disabled_Description": [
-		"",
+		"Setting to true disables the module",
 		"string"
 	],
 	"ItemsPerPage": [
@@ -12,7 +12,7 @@
 		"int"
 	],
 	"ItemsPerPage_Description": [
-		"",
+		"Define number of tasks displayed per page",
 		"string"
 	]
 }
