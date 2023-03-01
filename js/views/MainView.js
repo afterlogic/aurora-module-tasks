@@ -140,7 +140,7 @@ CMainView.prototype.onGetCalendarsResponse = function (oResponse, oParameters)
 		_.each(oResponse.Result.Calendars, function (oCalendarData) {
 			oCalendar = this.calendars.parseCalendar(oCalendarData);
 			
-			if (!oCalendar.isShared()) // TODO
+			if (!oCalendar.isShared() && !oCalendar.subscribed())
 			{
 				aCalendarIds.push(oCalendar.id);
 				oClientCalendar = this.calendars.getCalendarById(oCalendar.id);
