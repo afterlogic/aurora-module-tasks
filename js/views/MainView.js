@@ -113,9 +113,7 @@ CMainView.prototype.getCalendars = function ()
 	Ajax.send(
 			'Calendar',
 			'GetCalendars', 
-			{
-				'IsPublic': false
-			}, 
+			null, 
 			this.onGetCalendarsResponse, 
 			this
 	);
