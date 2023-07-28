@@ -232,7 +232,7 @@ CMainView.prototype.prepareTask = function (oItem)
 	oItem.visible = ko.observable(oCalendar.active());
 	oItem.color = oCalendar.color;
 	oItem.checked.subscribe(function(newValue){
-		self.updateTaskStatus(oItem);
+		self.updateTask(oItem);
 	});
 	return oItem;	
 };
@@ -367,7 +367,7 @@ CMainView.prototype.getParamsFromEventData = function (oEventData)
 		owner: oEventData.owner,
 		recurrenceId: oEventData.recurrenceId,
 		excluded: oEventData.excluded,
-		allEvents: oEventData.allEvents,
+		allEvents: oEventData.excluded ? Enums.CalendarEditRecurrenceEvent.OnlyThisInstance : Enums.CalendarEditRecurrenceEvent.AllEvents,
 		modified: oEventData.modified ? 1 : 0,
 		start: oEventData.start.local().toDate(),
 		end: oEventData.end.local().toDate(),
@@ -472,7 +472,7 @@ CMainView.prototype.taskClickCallback = function (oData)
 					Alarms: oData.alarms,
 					Attendees: oData.attendees,
 					RRule: oData.rrule,
-					Excluded: false,
+					Excluded: oData.excluded,
 					Owner: oData.owner,
 					Appointment: false,
 					OwnerName: oData.ownerName,
@@ -510,6 +510,9 @@ CMainView.prototype.taskClickCallback = function (oData)
 CMainView.prototype.updateTask = function (oData)
 {
     var aParameters = this.getParamsFromEventData(oData);
+
+	aParameters['status'] = oData.checked();
+	aParameters['withDate'] = oData.withDate();
 
     Ajax.send(
 		'Calendar',
@@ -601,7 +604,10 @@ CMainView.prototype.updateTaskStatus = function (oData)
 			'TaskId': oData.uid,
 			'Subject': oData.subject,
 			'Status': oData.checked(),
-			'WithDate': oData.withDate()
+			'WithDate': oData.withDate(),
+			'RRulle': oData.rrule,
+			'RecurrenceId': oData.recurrenceId,
+			'Excluded': oData.excluded !== undefined ? oData.excluded : false
 		},
 		this.onUpdateTaskStatusResponse,
 		this
