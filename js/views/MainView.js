@@ -232,6 +232,7 @@ CMainView.prototype.prepareTask = function (oItem)
 	oItem.visible = ko.observable(oCalendar.active());
 	oItem.color = oCalendar.color;
 	oItem.checked.subscribe(function(newValue){
+		oItem.status = newValue;
 		self.updateTask(oItem);
 	});
 	return oItem;	
@@ -511,9 +512,6 @@ CMainView.prototype.updateTask = function (oData)
 {
     var aParameters = this.getParamsFromEventData(oData);
 
-	aParameters['status'] = oData.checked();
-	aParameters['withDate'] = oData.withDate();
-
     Ajax.send(
 		'Calendar',
 		'UpdateEvent', 
@@ -586,37 +584,6 @@ CMainView.prototype.onDeleteTaskResponse = function (oResponse, oArguments)
 		}
 	}
 	else
-	{
-		Api.showErrorByCode(oResponse);
-	}
-};
-
-/**
- * @param {Object} oData
- */
-CMainView.prototype.updateTaskStatus = function (oData)
-{
-	Ajax.send(
-		'Calendar',
-		'UpdateTask', 
-		{
-			'CalendarId': oData.calendarId,
-			'TaskId': oData.uid,
-			'Subject': oData.subject,
-			'Status': oData.checked(),
-			'WithDate': oData.withDate(),
-			'RRulle': oData.rrule,
-			'RecurrenceId': oData.recurrenceId,
-			'Excluded': oData.excluded !== undefined ? oData.excluded : false
-		},
-		this.onUpdateTaskStatusResponse,
-		this
-	);	
-};
-
-CMainView.prototype.onUpdateTaskStatusResponse = function (oResponse, oArguments)
-{
-	if (!oResponse.Result)
 	{
 		Api.showErrorByCode(oResponse);
 	}
