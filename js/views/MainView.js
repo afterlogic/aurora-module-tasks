@@ -195,10 +195,10 @@ CMainView.prototype.prepareTask = function (oItem)
 	
 	oItem.visibleDate = ko.observable('');
 
-	oItem.withDate = ko.observable(false);
+	oItem.withDate = false;
 	if (oItem.start && oItem.end)
 	{
-		oItem.withDate(true);
+		oItem.withDate = true;
 		oItem.start = moment(oItem.start);
 		oItem.end = moment(oItem.end);
 
@@ -370,10 +370,10 @@ CMainView.prototype.getParamsFromEventData = function (oEventData)
 		excluded: oEventData.excluded,
 		allEvents: oEventData.excluded ? Enums.CalendarEditRecurrenceEvent.OnlyThisInstance : Enums.CalendarEditRecurrenceEvent.AllEvents,
 		modified: oEventData.modified ? 1 : 0,
-		start: oEventData.start.local().toDate(),
-		end: oEventData.end.local().toDate(),
-		startTS: oEventData.start.unix(),
-		endTS: oEventData.end ? oEventData.end.unix() : oEventData.end.unix(),
+		start: oEventData.withDate ? oEventData.start.local().toDate() : null,
+		end: oEventData.withDate ? oEventData.end.local().toDate() : null,
+		startTS: oEventData.withDate ? oEventData.start.unix() : null,
+		endTS: oEventData.withDate ? (oEventData.end ? oEventData.end.unix() : oEventData.end.unix()) : null,
 		rrule: oEventData.rrule ? JSON.stringify(oEventData.rrule) : null,
 		type: oEventData.type,
 		status: oEventData.status,
