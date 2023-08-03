@@ -238,10 +238,10 @@ CMainView.prototype.prepareTask = function (oItem)
 	return oItem;	
 };
 
-CMainView.prototype.getTaskFromList = function (uid)
+CMainView.prototype.getTaskFromList = function (id)
 {
 	return _.find(this.tasksList(), function (oItem){
-		return oItem.uid === uid;
+		return oItem.id === id;
 	});
 };
 
@@ -440,8 +440,11 @@ CMainView.prototype.onCreateTaskResponse = function (oResponse)
 
 	if (oResult)
 	{
-		var oTask = this.prepareTask(oResult.Events[0]);
-		this.tasksList.push(oTask);
+		oResult.Events.forEach((event) => {
+			var oTask = this.prepareTask(event);
+			this.tasksList.push(oTask);
+		  })
+
 		this.sortTasksList();
 	}
 	else
@@ -528,14 +531,17 @@ CMainView.prototype.onUpdateTaskResponse = function (oResponse, oArguments)
 	if (oResult)
 	{
 		var 
-			uid = oResult.Events[0].uid,
-			oTask = this.getTaskFromList(uid)
+			resultEvent = _.find(oResult.Events, function(event){
+				return event.id === oArguments.Parameters.id;
+			}),
+			id = oArguments.Parameters.id,
+			oTask = this.getTaskFromList(id)
 		;
-		if(oTask)
+		if(oTask && resultEvent)
 		{
-			oTask = this.prepareTask(oResult.Events[0]);
+			oTask = this.prepareTask(resultEvent);
 			var index = _.findIndex(this.tasksList(), function(oItem){
-				return oItem.uid === uid;
+				return oItem.id === id;
 			});
 			if (index >= 0)
 			{
@@ -573,13 +579,13 @@ CMainView.prototype.onDeleteTaskResponse = function (oResponse, oArguments)
 	if (oResponse.Result)
 	{
 		var 
-			uid = oArguments.Parameters.uid,
-			oTask = this.getTaskFromList(uid)
+			id = oArguments.Parameters.id,
+			oTask = this.getTaskFromList(id)
 		;
 		if(oTask)
 		{
 			this.tasksList(_.without(this.tasksList(), _.findWhere(this.tasksList(), {
-				uid: uid
+				id: id
 			})));			
 		}
 	}
