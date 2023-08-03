@@ -528,8 +528,7 @@ CMainView.prototype.onUpdateTaskResponse = function (oResponse, oArguments)
 {
 	var oResult = oResponse.Result;
 
-	if (oResult)
-	{
+	if (oResult) {
 		var 
 			resultEvent = _.find(oResult.Events, function(event){
 				return event.id === oArguments.Parameters.id;
@@ -537,21 +536,25 @@ CMainView.prototype.onUpdateTaskResponse = function (oResponse, oArguments)
 			id = oArguments.Parameters.id,
 			oTask = this.getTaskFromList(id)
 		;
-		if(oTask && resultEvent)
-		{
+		if(oTask && resultEvent) {
 			oTask = this.prepareTask(resultEvent);
-			var index = _.findIndex(this.tasksList(), function(oItem){
-				return oItem.id === id;
-			});
-			if (index >= 0)
-			{
-				this.tasksList.splice(index, 1, oTask);
+
+			if (oTask.status && !this.showCompleted()) {
+				this.tasksList(_.without(this.tasksList(), _.findWhere(this.tasksList(), {
+					id: id
+				})));	
+	
+			} else {
+				var index = _.findIndex(this.tasksList(), function(oItem){
+					return oItem.id === id;
+				});
+				if (index >= 0) {
+					this.tasksList.splice(index, 1, oTask);
+				}
 			}
 			this.sortTasksList();
 		}
-	}
-	else
-	{
+	} else {
 		Api.showErrorByCode(oResponse);
 	}
 };
