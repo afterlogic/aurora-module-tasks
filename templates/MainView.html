@@ -11,9 +11,9 @@
 					<div class="panel_center">
 						<div class="scroll-inner">				
 							<div class="items_list calendars">
-		<!-- ko foreach: calendars.own() -->
-				<!-- ko template: {name: 'CalendarWebclient_CalendarItemView'} --><!-- /ko -->
-			<!-- /ko -->
+							<!-- ko foreach: calendars.own() -->
+								<!-- ko template: {name: 'CalendarWebclient_CalendarItemView'} --><!-- /ko -->
+							<!-- /ko -->
 							</div>
 						</div>
 					</div>
@@ -62,7 +62,7 @@
 									<span class="description" data-bind="text: searchText"></span>
 								</span>
 								<div class="items_sub_list sales_sub_list" data-bind="foreach: tasksList, visible : !loadingList()">
-									<div class="item" data-bind="css: {'selected': selected}, visible: visible">
+									<div class="item" data-bind="css: {'selected': selected, 'repeat': rrule && !excluded}, visible: visible">
 										<div class="item_content">
 											<span class="data table fadeout" >
 												<label class="custom_checkbox round" data-bind="css: {'checked': checked}, style: {'padding': '5px', 'background': color}"> 
@@ -70,7 +70,7 @@
 													<input type="checkbox" data-bind="checked: checked"> 
 												</label>
 												<span data-bind="css: {'withDate': withDate}">
-													<div data-bind="text: subject, style: {'text-decoration': checked() ? 'line-through' : 'none'}"></div>
+													<div class="task_subject" data-bind="text: subject, style: {'text-decoration': checked() ? 'line-through' : 'none'}"></div>
 													<div class="task_date" data-bind="text: visibleDate"></div>
 												</span>
 											</span>

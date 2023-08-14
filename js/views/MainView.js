@@ -20,7 +20,8 @@ var
 	
 	CCalendarListModel = require('modules/CalendarWebclient/js/models/CCalendarListModel.js'),
 	CCalendarModel = require('modules/CalendarWebclient/js/models/CCalendarModel.js'),
-	EditTaskPopup = require('modules/CalendarWebclient/js/popups/EditEventPopup.js')
+	EditTaskPopup = require('modules/CalendarWebclient/js/popups/EditEventPopup.js'),
+	EditEventRecurrencePopup = require('modules/CalendarWebclient/js/popups/EditEventRecurrencePopup.js')
 ;
 
 require('jquery-ui/ui/widgets/datepicker');
@@ -227,13 +228,55 @@ CMainView.prototype.prepareTask = function (oItem)
 		);
 	}
 
-	oItem.selected = ko.observable(false);
+	if(oItem.excluded === undefined) {
+		oItem.excluded = false;
+	}
+
+	if(oItem.rrule === undefined) {
+		oItem.rrule = false;
+	}
+
+	oItem.selected = ko.observable(oItem.selected);
 	oItem.checked = ko.observable(oItem.status);
 	oItem.visible = ko.observable(oCalendar.active());
 	oItem.color = oCalendar.color;
-	oItem.checked.subscribe(function(newValue){
+	oItem.checked.subscribe(function(newValue) {
 		oItem.status = newValue;
-		self.updateTask(oItem);
+		var
+			/**
+			 * @param {number} iResult
+			 */
+			fCallback = _.bind(function (iResult) {
+				if (iResult !== Enums.CalendarEditRecurrenceEvent.None) {
+					if (iResult === Enums.CalendarEditRecurrenceEvent.AllEvents && oItem.rrule) {
+					  oItem.start = moment.unix(oItem.rrule.startBase)
+					  oItem.end = moment.unix(oItem.rrule.endBase)
+					}
+					oItem.allEvents = iResult;
+					self.updateTask(oItem);
+				  } else {
+					oItem.checked(!newValue);
+				  }
+			}, this)
+		;
+
+		if (oItem.rrule && oItem.rrule.until) {
+			oItem.rrule.until = moment.unix(oItem.rrule.until).utc().hour(0).minute(0).second(0).unix();
+		}
+
+		var oCalendar = self.calendars.getCalendarById(oItem.calendarId)
+
+		if (oItem.rrule && !oCalendar.subscribed()) {
+			if (oItem.excluded) {
+				oItem.allEvents = Enums.CalendarEditRecurrenceEvent.OnlyThisInstance;
+				self.updateTask(oItem);
+			} else {
+				Popups.showPopup(EditEventRecurrencePopup, [fCallback])
+			}
+		} else {
+			oItem.allEvents = Enums.CalendarEditRecurrenceEvent.AllEvents;
+			self.updateTask(oItem);
+		}
 	});
 	return oItem;	
 };
@@ -354,6 +397,21 @@ CMainView.prototype.openTaskPopup = function (oCalendar, oStart, oEnd, bAllDay)
  */
 CMainView.prototype.getParamsFromEventData = function (oEventData)
 {
+	var
+		rrule = null
+	;
+	if (oEventData.rrule) {
+		rrule = {
+		  byDays: oEventData.rrule.byDays,
+		  count: oEventData.rrule.count,
+		  end: Types.pInt(oEventData.rrule.end),
+		  interval: Types.pInt(oEventData.rrule.interval),
+		  period: Types.pInt(oEventData.rrule.period),
+		  until: Types.pInt(oEventData.rrule.until),
+		  weekNum: oEventData.rrule.weekNum,
+		}
+	  }
+
 	return {
 		id: oEventData.id,
 		uid: oEventData.uid,
@@ -368,13 +426,13 @@ CMainView.prototype.getParamsFromEventData = function (oEventData)
 		owner: oEventData.owner,
 		recurrenceId: oEventData.recurrenceId,
 		excluded: oEventData.excluded,
-		allEvents: oEventData.excluded ? Enums.CalendarEditRecurrenceEvent.OnlyThisInstance : Enums.CalendarEditRecurrenceEvent.AllEvents,
+		allEvents: oEventData.allEvents,
 		modified: oEventData.modified ? 1 : 0,
 		start: oEventData.withDate ? oEventData.start.local().toDate() : null,
 		end: oEventData.withDate ? oEventData.end.local().toDate() : null,
 		startTS: oEventData.withDate ? oEventData.start.unix() : null,
 		endTS: oEventData.withDate ? (oEventData.end ? oEventData.end.unix() : oEventData.end.unix()) : null,
-		rrule: oEventData.rrule ? JSON.stringify(oEventData.rrule) : null,
+		rrule: rrule ? JSON.stringify(rrule) : null,
 		type: oEventData.type,
 		status: oEventData.status,
 		withDate: oEventData.withDate
@@ -400,38 +458,23 @@ CMainView.prototype.createTask = function (oData)
 
 CMainView.prototype.sortTasksList = function ()
 {
-	this.tasksList.sort(function (left, right) {
-		if (left.startTS !== null && right.startTS !== null) 
-		{
+	this.tasksList(this.tasksList().sort(function (left, right) {
+		if (!left.withDate && !right.withDate) {
+			if (left.lastModified === right.lastModified) {
+				return 0;
+			} else {
+				return left.lastModified > right.lastModified ? -1 : 1
+			}
+		} else if(!left.withDate) {
+			return -1;
+		} else if (left.startTS !== null && right.startTS !== null) {
 			if (left.startTS === right.startTS) 
 			{
 				return 0;
 			}
 			return (left.startTS > right.startTS) ? 1 : -1;
 		}
-		else
-		{
-			if (left.startTS === null && right.startTS === null)
-			{
-				if (left.lastModified === right.lastModified) 
-				{
-					return 0;
-				}
-				return (left.lastModified > right.lastModified) ? 1 : -1;
-			}
-			else
-			{
-				if (left.startTS === null)
-				{
-					return 1;
-				}
-				if (right.startTS === null)
-				{
-					return -1;
-				}
-			}
-		}
-	});
+	}));
 }
 
 CMainView.prototype.onCreateTaskResponse = function (oResponse)
@@ -490,23 +533,93 @@ CMainView.prototype.taskClickCallback = function (oData)
 					IsTaskApp: true
 				}
 			;
-			if (iResult !== Enums.CalendarEditRecurrenceEvent.None)
-			{
-				if (oData.start && oData.end)
-				{
-					oParams.Start = oData.start.clone();
-					oParams.Start = oParams.Start.local();
-
-					oParams.End = oData.end.clone();
-					oParams.End = oParams.End.local();
+			if (iResult !== Enums.CalendarEditRecurrenceEvent.None) {
+				if (iResult === Enums.CalendarEditRecurrenceEvent.AllEvents && oData.rrule) {
+				  oParams.Start = moment.unix(oData.rrule.startBase)
+				  oParams.End = moment.unix(oData.rrule.endBase)
+				} else {
+				  if (oData.start) { 
+					oParams.Start = oData.start.clone()
+					oParams.Start = oParams.Start.local()
+				  }
+				  if (oData.end) {
+					oParams.End = oData.end.clone()
+					oParams.End = oParams.End.local()
+				  }
 				}
-				Popups.showPopup(EditTaskPopup, [oParams]);
-			}
+				Popups.showPopup(EditTaskPopup, [oParams])
+			  }
 		}, this)
 	;
-
-	fCallback(Enums.CalendarEditRecurrenceEvent.AllEvents);
+    var oCalendar = this.calendars.getCalendarById(oData.calendarId)
+	if (oData.rrule && !oCalendar.subscribed()) {
+		if (oData.excluded) {
+			fCallback(Enums.CalendarEditRecurrenceEvent.OnlyThisInstance)
+		} else {
+			Popups.showPopup(EditEventRecurrencePopup, [fCallback])
+		}
+	} else {
+		fCallback(Enums.CalendarEditRecurrenceEvent.AllEvents)
+	}
 };
+
+/**
+ * @param {Object} oTask
+ */
+CMainView.prototype.addTask = function (oTask) {
+	if (oTask && !this.taskExists(oTask.id)) {
+	  this.tasksList.push(this.prepareTask(oTask))
+	}
+  }
+  
+  /**
+   * @param {string} sId
+   */
+  CMainView.prototype.getTask = function (sId) {
+	return _.find(
+	  this.tasksList(),
+	  function (oTask) {
+		return oTask.id === sId
+	  },
+	  this
+	)
+  }
+  
+  /**
+   * @param {string} sId
+   *
+   * @return {boolean}
+   */
+  CMainView.prototype.taskExists = function (sId) {
+	return !!this.getTask(sId)
+  }
+
+/**
+ * @param {string} sId
+ */
+CMainView.prototype.removeTask = function (sId) {
+	this.tasksList(
+	  _.filter(
+		this.tasksList(),
+		function (oEvent) {
+		  return oEvent.id !== sId
+		},
+		this
+	  )
+	)
+  }
+
+CMainView.prototype.removeTaskByUid = function (sUid, bSkipExcluded) {
+	this.tasksList(
+	  _.filter(
+		this.tasksList(),
+		function (oEvent) {
+		  return oEvent.uid !== sUid || (bSkipExcluded && oEvent.excluded)
+		},
+		this
+	  )
+	)
+  }
 
 /**
  * @param {Object} oEventData
@@ -526,34 +639,38 @@ CMainView.prototype.updateTask = function (oData)
 
 CMainView.prototype.onUpdateTaskResponse = function (oResponse, oArguments)
 {
-	var oResult = oResponse.Result;
+	var 
+		oResult = oResponse.Result,
+		oParameters = oArguments.Parameters,
+		oCalendar = this.calendars.getCalendarById(oParameters && oParameters.calendarId)
+	;
 
 	if (oResult) {
-		var 
-			resultEvent = _.find(oResult.Events, function(event){
-				return event.id === oArguments.Parameters.id;
-			}),
-			id = oArguments.Parameters.id,
-			oTask = this.getTaskFromList(id)
-		;
-		if(oTask && resultEvent) {
-			oTask = this.prepareTask(resultEvent);
+		var oTask = this.getTask(oParameters.id);
 
-			if (oTask.status && !this.showCompleted()) {
-				this.tasksList(_.without(this.tasksList(), _.findWhere(this.tasksList(), {
-					id: id
-				})));	
-	
-			} else {
-				var index = _.findIndex(this.tasksList(), function(oItem){
-					return oItem.id === id;
-				});
-				if (index >= 0) {
-					this.tasksList.splice(index, 1, oTask);
-				}
-			}
-			this.sortTasksList();
+		if (
+		  ((oTask && oTask.rrule) || oParameters.rrule) &&
+		  oParameters.allEvents === Enums.CalendarEditRecurrenceEvent.AllEvents
+		) {
+		  this.removeTaskByUid(oParameters.uid, true);
+		} else {
+		  this.removeTask(oParameters.id);
 		}
+  
+		_.each(
+		  oResponse.Result.Events,
+		  function (oData) {
+			this.addTask(oData)
+		  },
+		  this
+		);
+
+		oTask = this.getTask(oParameters.id);
+		if (oTask) {
+			this.selector.itemSelected(oTask);
+		}
+
+		this.sortTasksList();
 	} else {
 		Api.showErrorByCode(oResponse);
 	}
@@ -567,14 +684,10 @@ CMainView.prototype.executeRemove = function (oData)
 	Ajax.send(
 		'Calendar',
 		'DeleteEvent', 
-		{
-			'calendarId': oData.calendarId,
-			'uid': oData.uid
-		},
+		this.getParamsFromEventData(oData),
 		this.onDeleteTaskResponse,
 		this
 	);	
-	
 };
 
 CMainView.prototype.onDeleteTaskResponse = function (oResponse, oArguments)
@@ -582,15 +695,13 @@ CMainView.prototype.onDeleteTaskResponse = function (oResponse, oArguments)
 	if (oResponse.Result)
 	{
 		var 
-			id = oArguments.Parameters.id,
-			oTask = this.getTaskFromList(id)
+			oParameters = oArguments.Parameters
 		;
-		if(oTask)
-		{
-			this.tasksList(_.without(this.tasksList(), _.findWhere(this.tasksList(), {
-				id: id
-			})));			
-		}
+		if (oParameters.allEvents === Enums.CalendarEditRecurrenceEvent.OnlyThisInstance) {
+			this.removeTask(oParameters.id)
+		  } else {
+			this.removeTaskByUid(oParameters.uid)
+		  }
 	}
 	else
 	{
