@@ -19,7 +19,6 @@ var
 	UserSettings = require('%PathToCoreWebclientModule%/js/Settings.js'),
 	
 	CCalendarListModel = require('modules/CalendarWebclient/js/models/CCalendarListModel.js'),
-	CCalendarModel = require('modules/CalendarWebclient/js/models/CCalendarModel.js'),
 	EditTaskPopup = require('modules/CalendarWebclient/js/popups/EditEventPopup.js'),
 	EditEventRecurrencePopup = require('modules/CalendarWebclient/js/popups/EditEventRecurrencePopup.js')
 ;
@@ -33,11 +32,6 @@ require('jquery-ui/ui/widgets/datepicker');
  */
 function CMainView()
 {
-	this.sDateFormat = UserSettings.dateFormat();
-	
-	this.dateFormatMoment = Utils.getDateFormatForMoment(this.sDateFormat);
-	
-	
 	this.saveCommand = Utils.createCommand(this, this.executeSave);	
 	this.removeCommand = Utils.createCommand(this, this.executeRemove);	
 	this.calendars = new CCalendarListModel({
@@ -191,9 +185,10 @@ CMainView.prototype.prepareTask = function (oItem)
 {
 	var
 		self = this,
-		oCalendar = self.calendars.getCalendarById(oItem.calendarId)
+		oCalendar = self.calendars.getCalendarById(oItem.calendarId),
+		dateFormatMoment = Utils.getDateFormatForMoment(UserSettings.dateFormat())
 	;
-	
+
 	oItem.visibleDate = ko.observable('');
 
 	oItem.withDate = false;
@@ -213,14 +208,14 @@ CMainView.prototype.prepareTask = function (oItem)
 		var isEvOneDay = oMomentEnd.diff(oMomentStart, 'days') === 0;
 		var isEvOneTime = oMomentEnd.diff(oMomentStart, 'minutes') === 0;					
 
-		var sStartDate = self.getDateWithoutYearIfMonthWord(oMomentStart.format(self.dateFormatMoment));
-		var sEndDate = !isEvOneDay ? ' - ' + self.getDateWithoutYearIfMonthWord(oMomentEnd.format(self.dateFormatMoment)) : '';
+		var sStartDate = self.getDateWithoutYearIfMonthWord(oMomentStart.format(dateFormatMoment));
+		var sEndDate = !isEvOneDay ? ' - ' + self.getDateWithoutYearIfMonthWord(oMomentEnd.format(dateFormatMoment)) : '';
 
 		var sStartTime = !oItem.allDay ? ', ' + oMomentStart.format(this.sTimeFormat()) : '';
 		var sEndTime = !oItem.allDay && !isEvOneTime ? 
 			(isEvOneDay ? ' - ' : ', ')  + oMomentEnd.format(this.sTimeFormat()) : '';
 
-		oItem.visibleDate = ko.observable(
+		oItem.visibleDate(
 			sStartDate +
 			sStartTime +
 			sEndDate +
