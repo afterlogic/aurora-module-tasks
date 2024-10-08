@@ -7,6 +7,15 @@ module.exports = function (oAppData) {
 		
 		sModuleName = 'tasks'
 	;
+
+	let tasksViewInstance = null;
+
+	const getTasksViewInstance = () => {
+		if(!tasksViewInstance) {
+			tasksViewInstance = require('modules/%ModuleName%/js/views/MainView.js');
+		}
+		return tasksViewInstance;
+	}
 	
 	if (App.isUserNormalOrTenant() && ModulesManager.isModuleEnabled('CalendarWebclient'))
 	{
@@ -21,15 +30,23 @@ module.exports = function (oAppData) {
 			 * 
 			 * @returns {Object}
 			 */
-			getScreens: function ()
-			{
-				var oScreens = {};
-				
-				oScreens[sModuleName] = function () {
-					return require('modules/%ModuleName%/js/views/MainView.js');
-				};
-				
-				return oScreens;
+			start: function () {
+                App.broadcastEvent('RegisterNewItemElement', {
+                    'item': {
+                        'title': TextUtils.i18n('%MODULENAME%/ACTION_CREATE_TASK'),
+                        'handler': () => {
+                            const tasksViewInstance = getTasksViewInstance();
+                            tasksViewInstance.createTaskInCurrentCalendar();
+                        },
+                        'hash': sModuleName
+                    },
+                    'name': '%ModuleName%_NewTask',
+                    'order': 5,
+                    'column': 1
+                });
+			},
+			getScreens: function ()	{
+                return { [sModuleName]: getTasksViewInstance };
 			},
 			
 			/**
