@@ -35,8 +35,16 @@ module.exports = function (oAppData) {
                     'item': {
                         'title': TextUtils.i18n('%MODULENAME%/ACTION_CREATE_TASK'),
                         'handler': () => {
+							window.location.hash = sModuleName
                             const tasksViewInstance = getTasksViewInstance();
-                            tasksViewInstance.createTaskInCurrentCalendar();
+							if (tasksViewInstance.calendars.currentCal()) {
+								tasksViewInstance.createTaskInCurrentCalendar();
+							} else {
+								const currentCalSubscribtion = tasksViewInstance.calendars.currentCal.subscribe(function () {
+									tasksViewInstance.createTaskInCurrentCalendar();
+									currentCalSubscribtion.dispose();
+								});
+							}
                         },
                         'hash': sModuleName
                     },
