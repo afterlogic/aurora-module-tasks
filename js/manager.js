@@ -31,27 +31,25 @@ module.exports = function (oAppData) {
 			 * @returns {Object}
 			 */
 			start: function () {
-                App.broadcastEvent('RegisterNewItemElement', {
-                    'item': {
-                        'title': TextUtils.i18n('%MODULENAME%/ACTION_CREATE_TASK'),
-                        'handler': () => {
-							window.location.hash = sModuleName
-                            const tasksViewInstance = getTasksViewInstance();
-							if (tasksViewInstance.calendars.currentCal()) {
+				App.broadcastEvent('RegisterNewItemElement', {
+					'title': TextUtils.i18n('%MODULENAME%/ACTION_CREATE_TASK'),
+					'handler': () => {
+						window.location.hash = sModuleName
+						const tasksViewInstance = getTasksViewInstance();
+						if (tasksViewInstance.calendars.currentCal()) {
+							tasksViewInstance.createTaskInCurrentCalendar();
+						} else {
+							const currentCalSubscribtion = tasksViewInstance.calendars.currentCal.subscribe(function () {
 								tasksViewInstance.createTaskInCurrentCalendar();
-							} else {
-								const currentCalSubscribtion = tasksViewInstance.calendars.currentCal.subscribe(function () {
-									tasksViewInstance.createTaskInCurrentCalendar();
-									currentCalSubscribtion.dispose();
-								});
-							}
-                        },
-                        'hash': sModuleName
-                    },
-                    'name': '%ModuleName%_NewTask',
-                    'order': 5,
-                    'column': 1
-                });
+								currentCalSubscribtion.dispose();
+							});
+						}
+					},
+					'hash': sModuleName,
+					'className': 'item_tasks',
+					'order': 5,
+					'column': 1
+				});
 			},
 			getScreens: function ()	{
                 return { [sModuleName]: getTasksViewInstance };
