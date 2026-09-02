@@ -1,9 +1,9 @@
-<div class="screen TasksLayout" style="display: none;">
+<div class="screen TasksLayout" data-test-id="tasks-screen" style="display: none;">
 	<div class="panels" data-bind="splitterFlex: {storagePrefix: 'aurora_tasks_', sizes: [20, 80]}">
 		<div class="panel left_panel calendars_panel" data-splitter="tasks_list">
 			<div class="panel_content">
 				<div class="buttons big_single_button">
-					<span class="button"  data-bind="click: createTaskInCurrentCalendar"> 
+					<span class="button" data-test-id="tasks-create" data-bind="click: createTaskInCurrentCalendar"> 
 						<span data-bind="i18n: {'key': '%MODULENAME%/ACTION_CREATE_TASK'}"></span> 
 					</span>
 				</div>
@@ -62,10 +62,10 @@
 									<span class="description" data-bind="text: searchText"></span>
 								</span>
 								<div class="items_sub_list sales_sub_list" data-bind="foreach: tasksList, visible : !loadingList()">
-									<div class="item" data-bind="css: {'selected': selected, 'repeat': rrule && !excluded}, visible: visible">
+									<div class="item" data-test-id="tasks-item" data-bind="css: {'selected': selected, 'repeat': rrule && !excluded}, visible: visible">
 										<div class="item_content">
 											<span class="data table fadeout" >
-												<label class="custom_checkbox round" data-bind="css: {'checked': checked}, style: {'background': color}"> 
+												<label class="custom_checkbox round" data-test-id="tasks-item-check" data-bind="css: {'checked': checked}, style: {'background': color}"> 
 													<span class="icon"></span> 
 													<input type="checkbox" data-bind="checked: checked"> 
 												</label>
