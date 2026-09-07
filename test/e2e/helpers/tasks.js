@@ -67,7 +67,7 @@ function taskItemBySubject(page, subject) {
 }
 
 async function openTasks(page) {
-  await step('Open Tasks', async () => {
+  return step('Open Tasks', async () => {
     const tab = tasksNavTab(page)
     const visible = await tab
       .waitFor({ state: 'visible', timeout: T(30000) })
